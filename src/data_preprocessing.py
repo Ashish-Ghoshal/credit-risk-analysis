@@ -40,6 +40,26 @@ def initial_data_overview(df):
     print("\nFirst 5 rows of the original data:")
     print(df.head())
 
+def plot_missing_values_heatmap(df, output_dir='plots'):
+    """
+    Generates and saves a heatmap visualizing the pattern of missing values in the DataFrame.
+    Args:
+        df (pd.DataFrame): The DataFrame to visualize.
+        output_dir (str): Directory to save the plot.
+    """
+    if not os.path.exists(output_dir):
+        os.makedirs(output_dir)
+
+    print(f"\n--- Generating Missing Values Heatmap in '{output_dir}' directory ---")
+    plt.figure(figsize=(12, 8))
+    sns.heatmap(df.isnull(), cbar=False, cmap='viridis')
+    plt.title('Missing Values Heatmap (Before Cleaning)')
+    plt.tight_layout()
+    plt.savefig(os.path.join(output_dir, 'missing_values_heatmap_before_cleaning.png'))
+    plt.close()
+    print("Missing values heatmap saved.")
+
+
 def clean_data(df):
     """
     Performs core data cleaning steps on the DataFrame.
@@ -96,6 +116,36 @@ def clean_data(df):
     print("Finished initial data cleaning and missing value imputation.")
     return df
 
+def plot_categorical_distributions(df, output_dir='plots'):
+    """
+    Generates and saves count plots for key categorical features to visualize their distributions.
+    Args:
+        df (pd.DataFrame): The DataFrame containing categorical features.
+        output_dir (str): Directory to save the plots.
+    """
+    if not os.path.exists(output_dir):
+        os.makedirs(output_dir)
+
+    print(f"\n--- Generating Categorical Feature Distribution Plots in '{output_dir}' directory ---")
+    categorical_cols = df.select_dtypes(include='object').columns.tolist()
+    
+    # Select a few representative categorical columns for plotting
+    # Avoid plotting too many if there are many unique values or too many columns
+    cols_to_plot = [col for col in categorical_cols if df[col].nunique() < 20 and col != 'loan_status'] # Exclude target for now, handle separately
+    if len(cols_to_plot) > 5: # Limit to avoid too many plots
+        cols_to_plot = cols_to_plot[:5]
+
+    for col in cols_to_plot:
+        plt.figure(figsize=(10, 6))
+        sns.countplot(y=df[col], order=df[col].value_counts().index, palette='viridis')
+        plt.title(f'Distribution of {col} (Before Encoding)')
+        plt.tight_layout()
+        plt.savefig(os.path.join(output_dir, f'categorical_distribution_{col}_before_encoding.png'))
+        plt.close()
+        print(f"Saved 'categorical_distribution_{col}_before_encoding.png'")
+    print("Categorical distribution plots saved.")
+
+
 def feature_engineering(df):
     """
     Creates new, more informative features from existing ones.
@@ -140,6 +190,40 @@ def feature_engineering(df):
         print("Created 'credit_history_length_months' and dropped 'earliest_credit_line'.")
 
     return df
+
+def plot_outliers_before_handling(df, output_dir='plots'):
+    """
+    Generates and saves boxplots for key numerical features to visualize outliers BEFORE capping.
+    Args:
+        df (pd.DataFrame): The DataFrame with engineered features (before outlier handling).
+        output_dir (str): Directory to save the plots.
+    """
+    if not os.path.exists(output_dir):
+        os.makedirs(output_dir)
+
+    print(f"\n--- Generating Boxplots for Outlier Visualization (Before Capping) in '{output_dir}' directory ---")
+    numerical_cols = df.select_dtypes(include=np.number).columns.tolist()
+    
+    # Select a few key numerical columns for plotting outliers
+    # Avoid columns with very few unique values or those that are essentially categorical
+    cols_to_plot = [
+        'annual_income', 'loan_amount', 'installment', 'debt_to_income',
+        'total_credit_limit', 'total_credit_utilized', 'interest_rate'
+    ]
+    # Filter to ensure columns exist in the current DataFrame
+    cols_to_plot = [col for col in cols_to_plot if col in numerical_cols]
+
+    for col in cols_to_plot:
+        plt.figure(figsize=(8, 6))
+        sns.boxplot(y=df[col], palette='pastel')
+        plt.title(f'Boxplot of {col} (Before Outlier Capping)')
+        plt.ylabel(col)
+        plt.tight_layout()
+        plt.savefig(os.path.join(output_dir, f'boxplot_before_capping_{col}.png'))
+        plt.close()
+        print(f"Saved 'boxplot_before_capping_{col}.png'")
+    print("Boxplots for outlier visualization saved.")
+
 
 def handle_outliers(df):
     """
@@ -220,10 +304,78 @@ def preprocess_data(df):
             
     return df
 
-def visualize_data(df, output_dir='plots'):
+def plot_scaling_impact(df_before_scaling, df_after_scaling, output_dir='plots'):
     """
-    Generates and saves exploratory data visualizations to understand feature distributions
-    and correlations after preprocessing.
+    Generates and saves plots comparing the distribution of key numerical features
+    before and after StandardScaler.
+    Args:
+        df_before_scaling (pd.DataFrame): DataFrame before scaling.
+        df_after_scaling (pd.DataFrame): DataFrame after scaling.
+        output_dir (str): Directory to save the plots.
+    """
+    if not os.path.exists(output_dir):
+        os.makedirs(output_dir)
+
+    print(f"\n--- Generating Scaling Impact Comparison Plots in '{output_dir}' directory ---")
+    
+    # Select a few key numerical columns to show scaling impact
+    cols_to_compare = [
+        'annual_income', 'loan_amount', 'installment', 'debt_to_income',
+        'total_credit_limit', 'total_credit_utilized', 'interest_rate'
+    ]
+    # Filter to ensure columns exist in both DataFrames
+    cols_to_compare = [col for col in cols_to_compare if col in df_before_scaling.columns and col in df_after_scaling.columns]
+
+    for col in cols_to_compare:
+        fig, axes = plt.subplots(1, 2, figsize=(14, 5))
+        sns.histplot(df_before_scaling[col], kde=True, ax=axes[0], color='skyblue', edgecolor='black')
+        axes[0].set_title(f'Original Distribution of {col}')
+        axes[0].set_xlabel(col)
+        axes[0].set_ylabel('Frequency')
+
+        sns.histplot(df_after_scaling[col], kde=True, ax=axes[1], color='lightcoral', edgecolor='black')
+        axes[1].set_title(f'Scaled Distribution of {col}')
+        axes[1].set_xlabel(col)
+        axes[1].set_ylabel('Frequency')
+        
+        plt.suptitle(f'Distribution Comparison: {col} (Before vs. After Scaling)', y=1.05, fontsize=16)
+        plt.tight_layout(rect=[0, 0.03, 1, 0.98])
+        plt.savefig(os.path.join(output_dir, f'scaling_impact_{col}.png'))
+        plt.close()
+        print(f"Saved 'scaling_impact_{col}.png'")
+    print("Scaling impact plots saved.")
+
+def plot_target_distribution(df, target_col='loan_status', output_dir='plots'):
+    """
+    Generates and saves a count plot for the target variable distribution.
+    Args:
+        df (pd.DataFrame): The DataFrame containing the target variable.
+        target_col (str): The name of the target column.
+        output_dir (str): Directory to save the plot.
+    """
+    if not os.path.exists(output_dir):
+        os.makedirs(output_dir)
+
+    print(f"\n--- Generating Target Variable Distribution Plot in '{output_dir}' directory ---")
+    if target_col in df.columns:
+        plt.figure(figsize=(8, 6))
+        sns.countplot(x=df[target_col], palette='coolwarm')
+        plt.title(f'Distribution of {target_col}')
+        plt.xlabel(target_col)
+        plt.ylabel('Count')
+        plt.tight_layout()
+        plt.savefig(os.path.join(output_dir, f'target_distribution_{target_col}.png'))
+        plt.close()
+        print(f"Saved 'target_distribution_{target_col}.png'")
+    else:
+        print(f"Warning: Target column '{target_col}' not found in DataFrame. Skipping plot.")
+    print("Target variable distribution plot saved.")
+
+
+def plot_final_distributions_and_correlation(df, output_dir='plots'):
+    """
+    Generates and saves exploratory data visualizations (histograms and correlation matrix)
+    for the final preprocessed data.
     Args:
         df (pd.DataFrame): The final preprocessed DataFrame to visualize.
         output_dir (str): The directory where the generated plots will be saved.
@@ -232,7 +384,7 @@ def visualize_data(df, output_dir='plots'):
         os.makedirs(output_dir)
         print(f"Created output directory: '{output_dir}'")
         
-    print(f"\n--- Generating visualizations in '{output_dir}' directory ---")
+    print(f"\n--- Generating Final Preprocessed Data Visualizations in '{output_dir}' directory ---")
     
     # Select a subset of numerical columns for histogram visualization
     # Avoid plotting too many columns at once for clarity and to prevent memory issues with very wide dataframes.
@@ -260,7 +412,7 @@ def visualize_data(df, output_dir='plots'):
     plt.close()
     print(f"Saved 'correlation_matrix_post_preprocessing.png'")
     
-    print("All specified visualizations saved successfully.")
+    print("Final preprocessed data visualizations saved successfully.")
 
 def main():
     """
@@ -271,19 +423,36 @@ def main():
     """
     file_path = 'data/loans_full_schema.csv' # Updated to the specific Kaggle file name
     output_processed_data_path = 'data/preprocessed_loan_data.csv'
+    output_plots_dir = 'plots' # Define output directory for plots
+
+    # Ensure the plots directory exists at the start
+    if not os.path.exists(output_plots_dir):
+        os.makedirs(output_plots_dir)
+        print(f"Created output directory: '{output_plots_dir}'")
     
     df = load_data(file_path)
     if df is None:
         return # Exit if data loading failed
 
-    initial_data_overview(df.copy()) # Show initial state before modification
-        
-    # Execute the preprocessing pipeline steps sequentially
+    # --- Initial Data Overview and Pre-cleaning Visualizations ---
+    initial_data_overview(df.copy())
+    plot_missing_values_heatmap(df.copy(), output_plots_dir) # Plot missing values before cleaning
+
     df_cleaned = clean_data(df.copy())
+    plot_categorical_distributions(df_cleaned.copy(), output_plots_dir) # Plot categorical distributions before encoding
+
     df_engineered = feature_engineering(df_cleaned.copy())
+    plot_outliers_before_handling(df_engineered.copy(), output_plots_dir) # Plot outliers before capping
+
     df_outliers_handled = handle_outliers(df_engineered.copy())
+    
+    # --- Post-processing and Final Visualizations ---
     df_preprocessed = preprocess_data(df_outliers_handled.copy())
     
+    plot_scaling_impact(df_outliers_handled.copy(), df_preprocessed.copy(), output_plots_dir) # Plot scaling impact
+    plot_target_distribution(df_preprocessed.copy(), 'loan_status', output_plots_dir) # Plot target distribution
+    plot_final_distributions_and_correlation(df_preprocessed.copy(), output_plots_dir) # Existing final plots
+
     print(f"\nFinal preprocessed data shape: {df_preprocessed.shape}")
     print("\nFirst 5 rows of the final preprocessed data:")
     print(df_preprocessed.head())
@@ -295,8 +464,7 @@ def main():
     except Exception as e:
         print(f"Error saving preprocessed data: {e}")
     
-    # Generate and save visualizations of the preprocessed data
-    visualize_data(df_preprocessed)
+    print("\nData preprocessing and visualization pipeline completed.")
 
 if __name__ == "__main__":
     main()
