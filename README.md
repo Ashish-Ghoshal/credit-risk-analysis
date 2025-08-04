@@ -89,7 +89,7 @@ credit-risk-analysis/
 To set up and run this project locally, follow these steps:
 
 1. **Clone the repository:**  
-    git clone <https://github.com/your-username/credit-risk-analysis.git>  
+    git clone <https://github.com/Ashish-Ghoshal/credit-risk-analysis.git>  
     cd credit-risk-analysis  
 
 2. Create a virtual environment (highly recommended):  
