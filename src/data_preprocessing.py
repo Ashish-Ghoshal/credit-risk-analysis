@@ -193,7 +193,8 @@ def feature_engineering(df):
 
 def plot_outliers_before_handling(df, output_dir='plots'):
     """
-    Generates and saves boxplots for key numerical features to visualize outliers BEFORE capping.
+    Generates and saves a single image with multiple boxplots for key numerical features
+    to visualize outliers BEFORE capping.
     Args:
         df (pd.DataFrame): The DataFrame with engineered features (before outlier handling).
         output_dir (str): Directory to save the plots.
@@ -201,28 +202,40 @@ def plot_outliers_before_handling(df, output_dir='plots'):
     if not os.path.exists(output_dir):
         os.makedirs(output_dir)
 
-    print(f"\n--- Generating Boxplots for Outlier Visualization (Before Capping) in '{output_dir}' directory ---")
+    print(f"\n--- Generating Consolidated Boxplots for Outlier Visualization (Before Capping) in '{output_dir}' directory ---")
     numerical_cols = df.select_dtypes(include=np.number).columns.tolist()
     
     # Select a few key numerical columns for plotting outliers
-    # Avoid columns with very few unique values or those that are essentially categorical
+    # Aim for a manageable number to fit in one figure (e.g., 6-9 plots)
     cols_to_plot = [
         'annual_income', 'loan_amount', 'installment', 'debt_to_income',
-        'total_credit_limit', 'total_credit_utilized', 'interest_rate'
+        'total_credit_limit', 'total_credit_utilized', 'interest_rate',
+        'total_collection_amount_ever', 'total_debit_limit'
     ]
     # Filter to ensure columns exist in the current DataFrame
     cols_to_plot = [col for col in cols_to_plot if col in numerical_cols]
 
-    for col in cols_to_plot:
-        plt.figure(figsize=(8, 6))
-        sns.boxplot(y=df[col], palette='pastel')
-        plt.title(f'Boxplot of {col} (Before Outlier Capping)')
-        plt.ylabel(col)
-        plt.tight_layout()
-        plt.savefig(os.path.join(output_dir, f'boxplot_before_capping_{col}.png'))
-        plt.close()
-        print(f"Saved 'boxplot_before_capping_{col}.png'")
-    print("Boxplots for outlier visualization saved.")
+    # Determine grid size for subplots
+    n_cols = 3
+    n_rows = (len(cols_to_plot) + n_cols - 1) // n_cols # Calculate rows needed
+    
+    fig, axes = plt.subplots(n_rows, n_cols, figsize=(n_cols * 5, n_rows * 6))
+    axes = axes.flatten() # Flatten the array of axes for easy iteration
+
+    for i, col in enumerate(cols_to_plot):
+        sns.boxplot(y=df[col], ax=axes[i], palette='pastel')
+        axes[i].set_title(f'Boxplot of {col}')
+        axes[i].set_ylabel(col)
+
+    # Hide any unused subplots
+    for j in range(i + 1, len(axes)):
+        fig.delaxes(axes[j])
+
+    plt.suptitle('Outlier Visualization: Key Numerical Features (Before Capping)', y=1.02, fontsize=18)
+    plt.tight_layout(rect=[0, 0.03, 1, 0.98]) # Adjust layout to prevent title overlap
+    plt.savefig(os.path.join(output_dir, 'consolidated_boxplots_before_capping.png'))
+    plt.close()
+    print("Consolidated boxplots for outlier visualization saved.")
 
 
 def handle_outliers(df):
