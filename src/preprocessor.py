@@ -34,8 +34,6 @@ def preprocess_data(df):
             print(f"One-Hot encoded multi-class feature: '{col}' (created {unique_values - 1} new columns).")
             
     # Standard Scaling for all numerical features.
-    # This transforms data to have a mean of 0 and standard deviation of 1,
-    # which is beneficial for many ML algorithms that are sensitive to feature scales.
     numerical_cols = df.select_dtypes(include=np.number).columns
     if len(numerical_cols) > 0:
         scaler = StandardScaler()
@@ -44,12 +42,6 @@ def preprocess_data(df):
     else:
         print("No numerical features to scale after encoding.")
     
-    # --- Future Enhancement Idea: Handling High Cardinality Categorical Features ---
-    # For columns like 'sub_grade' or 'state' if they have many unique values after initial cleaning,
-    # consider techniques like:
-    # - Target Encoding: Encode categories based on the mean of the target variable.
-    # - Frequency Encoding: Replace categories with their frequency in the dataset.
-    # - Grouping Rare Categories: Combine categories that appear infrequently into an 'Other' category.
 
     return df
 

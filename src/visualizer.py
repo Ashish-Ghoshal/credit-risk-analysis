@@ -80,8 +80,6 @@ def plot_final_distributions_and_correlation(df, output_dir='plots'):
     # Pandas' select_dtypes(include=np.number) will correctly pick up int, float, uint8 (for OHE).
     all_numerical_cols = df.select_dtypes(include=np.number).columns.tolist()
 
-    # For histograms, we might still want to limit for readability if there are too many.
-    # For the correlation matrix, we want to show all, but adjust figure size.
     
     # --- Histograms ---
     # Limit for readability if there are too many columns

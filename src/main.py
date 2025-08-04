@@ -43,7 +43,7 @@ def main():
     
     # --- Stage 5: Final Preprocessing (Encoding and Scaling) ---
     # Plot target distribution BEFORE final preprocessing (encoding)
-    # This ensures 'loan_status' is still a categorical column for the plot.
+
     plot_target_distribution(df_outliers_handled.copy(), 'loan_status', output_plots_dir) 
 
     # Keep a copy before scaling to show scaling impact

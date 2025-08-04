@@ -77,12 +77,6 @@ def clean_data(df):
     df.drop(columns=[col for col in cols_to_drop if col in df.columns], inplace=True)
     print(f"Dropped irrelevant columns: {', '.join([col for col in cols_to_drop if col in df.columns])}")
 
-    # --- Future Enhancement Idea: Consistency Checks for Numerical Ranges ---
-    # You could add checks here to ensure numerical values are within logical ranges.
-    # For example:
-    # if 'annual_income' in df.columns:
-    #     df['annual_income'] = df['annual_income'].apply(lambda x: max(x, 0)) # Ensure no negative income
-    #     print("Ensured 'annual_income' is non-negative.")
 
     print("Finished initial data cleaning and missing value imputation.")
     return df
