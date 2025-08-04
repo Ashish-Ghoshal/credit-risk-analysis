@@ -4,18 +4,19 @@ A professional-grade data preprocessing pipeline for credit risk analysis, devel
 
 ## **Table of Contents**
 
-- [Introduction](https://www.google.com/search?q=%23introduction)
-- [Problem Statement](https://www.google.com/search?q=%23problem-statement)
-- [Key Features](https://www.google.com/search?q=%23key-features)
-- [Dataset](https://www.google.com/search?q=%23dataset)
-- [Technologies Used](https://www.google.com/search?q=%23technologies-used)
-- [Project Structure](https://www.google.com/search?q=%23project-structure)
-- [Setup and Installation](https://www.google.com/search?q=%23setup-and-installation)
-- [Usage](https://www.google.com/search?q=%23usage)
-- [Interpreting the Results](https://www.google.com/search?q=%23interpreting-the-results)
-- [Future Enhancements](https://www.google.com/search?q=%23future-enhancements)
-- [Contributing](https://www.google.com/search?q=%23contributing)
-- [License](https://www.google.com/search?q=%23license)
+* [Introduction](#introduction)
+* [Problem Statement](#problem-statement)
+* [Key Features](#key-features)
+* [Dataset](#dataset)
+* [Technologies Used](#technologies-used)
+* [Project Structure](#project-structure)
+* [Setup and Installation](#setup-and-installation)
+* [Usage](#usage)
+* [Interpreting the Results](#interpreting-the-results)
+* [Key Analytical Insights from Data Preprocessing](#key-analytical-insights-from-data-preprocessing)
+* [Future Enhancements](#future-enhancements)
+* [Contributing](#contributing)
+* [License](#license)
 
 ## **Introduction**
 
